@@ -8,7 +8,7 @@ $(command -v parallel > /dev/null 2> /dev/null) || (echo "Please install GNU Par
 
 #   Some useful global variables
 OUT_DEFAULT="$(pwd -P)/merged"
-DELIMETER=','
+declare -x DELIMETER=','
 
 #   Usage message
 function Usage() {
@@ -81,7 +81,7 @@ function merge() {
     local samplelist="$1" # Where is our sample list?
     local mergedname="$2" # What is the name of our merged sample?
     local outdir="$3" # Where do we put our output file?
-    local -a samples=($(echo "$4" | tr "${DELIMETER}" ' ')) # Make an array of old sample names
+    local -a samples=($(echo $4 | tr "${DELIMETER}" ' ')) # Make an array of old sample names
     #   Pick out our BAM files
     local -a bamfiles=($(grep --color=never -f <(echo "${samples[@]}" | tr ' ' '\n') "${samplelist}"))
     #   Merge the BAM files
@@ -92,4 +92,4 @@ function merge() {
 #   Export the function
 export -f merge
 
-parallel --verbose --xapply "merge ${BAMDIR} {1} ${OUTDIR} {2}" ::: "${!SAMPLE_NAMES[@]}" ::: "${SAMPLE_NAMES[@]}"
+parallel --verbose --xapply "merge ${SAMPLE_LIST} {1} ${OUTDIR} {2}" ::: "${!SAMPLE_NAMES[@]}" ::: "${SAMPLE_NAMES[@]}"
