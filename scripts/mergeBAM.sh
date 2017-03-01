@@ -8,7 +8,7 @@ $(command -v parallel > /dev/null 2> /dev/null) || (echo "Please install GNU Par
 
 #   Some useful global variables
 OUT_DEFAULT="$(pwd -P)/merged"
-declare -x DELIMETER=','
+declare -x DELIMITER=','
 
 #   Usage message
 function Usage() {
@@ -73,7 +73,7 @@ while read line
 do
     name=$(echo "${line}" | tr '[:space:]' ' ' | cut -f 1 -d ' ')
     [[ "${name:0:1}" == '#' ]] && continue
-    SAMPLE_NAMES["${name}"]="$(echo ${line} | tr '[:space:]' ${DELIMETER} | cut -f 2- -d ${DELIMETER})"
+    SAMPLE_NAMES["${name}"]="$(echo ${line} | tr '[:space:]' ${DELIMITER} | cut -f 2- -d ${DELIMITER})"
 done < "${TABLE}"
 
 #   A function to merge the files
@@ -81,7 +81,7 @@ function merge() {
     local samplelist="$1" # Where is our sample list?
     local mergedname="$2" # What is the name of our merged sample?
     local outdir="$3" # Where do we put our output file?
-    local -a samples=($(echo $4 | tr "${DELIMETER}" ' ')) # Make an array of old sample names
+    local -a samples=($(echo $4 | tr "${DELIMITER}" ' ')) # Make an array of old sample names
     #   Pick out our BAM files
     local -a bamfiles=($(grep --color=never -f <(echo "${samples[@]}" | tr ' ' '\n') "${samplelist}"))
     #   Merge the BAM files
