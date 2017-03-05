@@ -8,3 +8,4 @@
 module load samtools
 
 samtools merge finalBamFile.bam *.bam
+
