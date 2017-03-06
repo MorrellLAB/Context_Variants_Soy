@@ -7,6 +7,7 @@
 
 # Run this with qsub -t 0-7 mergeBam.sh
 
+module load parallel
 set -eo pipefail
 
 #   Check for dependencies
@@ -20,11 +21,10 @@ PICARD_DEFAULT="/usr/local/bin/picard.jar"
 declare -x DELIMITER=','
 
 #   FILL THESE OUT
-TABLE='' # Sample table
-SAMPLE_LIST='' # Sample list
+TABLE=/panfs/roc/scratch/fernanda/FN30/SAM_Processing/SAMtools/Sorted_BAM/reheader/FN30_sample_names_unix.txt
+SAMPLE_LIST=/panfs/roc/scratch/fernanda/FN30/SAM_Processing/SAMtools/Sorted_BAM/reheader/sorted_reheader_BAM.txt
 OUTDIR='' # Optional
-PICARD_JAR='' # Path to Picard JAR file
-
+PICARD_JAR=/panfs/roc/groups/9/morrellp/shared/Software/GATK-3.6/GenomeAnalysisTK.jar
 
 #   Usage message
 function Usage() {
