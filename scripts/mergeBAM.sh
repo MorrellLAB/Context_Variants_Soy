@@ -5,7 +5,7 @@
 #PBS -M mfrodrig@umn.edu
 #PBS -q lab
 
-# Run this with qsub -t 0-7 mergeBam.sh
+# Run this with qsub -t 0-7 mergeBAM.sh
 
 module load parallel
 set -eo pipefail
