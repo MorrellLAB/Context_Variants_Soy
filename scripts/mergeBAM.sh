@@ -105,6 +105,7 @@ function merge() {
     local mergedname="$2" # What is the name of our merged sample?
     local outdir="$3" # Where do we put our output file?
     local picardjar="$4" # Where is our Picard JAR file?
+    exit 8
     local -a samples=($(echo $5 | tr "${DELIMITER}" ' ')) # Make an array of old sample names
     #   Pick out our BAM files
     local -a bamfiles=($(grep --color=never -f <(echo ${samples[@]} | tr ' ' '\n') ${samplelist}))
@@ -119,6 +120,6 @@ function merge() {
 #   Export the function
 export -f merge
 
-merge "${SAMPLE_LIST}" "${!SAMPLE_NAMES[$PBS_ARRAYID]}" "${OUTDIR}" "${PICARD_JAR}" "${SAMPLE_NAMES[$PBS_ARRAYID]}"
+(set -x; merge "${SAMPLE_LIST}" "${!SAMPLE_NAMES[$PBS_ARRAYID]}" "${OUTDIR}" "${PICARD_JAR}" "${SAMPLE_NAMES[$PBS_ARRAYID]}")
 
 # parallel --verbose --xapply "merge ${SAMPLE_LIST} {1} ${OUTDIR} ${PICARD_JAR} {2}" ::: "${!SAMPLE_NAMES[@]}" ::: "${SAMPLE_NAMES[@]}"
