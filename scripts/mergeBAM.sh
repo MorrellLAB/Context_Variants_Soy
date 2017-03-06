@@ -112,7 +112,7 @@ function merge() {
     local outname=""${outdir}/${mergedname}_merged.bam
     #   Merge the BAM files
     # (set -x; bamtools merge -list <(echo "${bamfiles[@]}" | tr ' ' '\n') > "${outdir}/${mergedname}_merged.bam")
-    (set -x; java -jar "${picardjar}" MergeSamFiles $(for s in ${bamfiles[@]}; do echo -n "I=$s "; done) O="${outname}")
+    java -jar "${picardjar}" MergeSamFiles $(for s in ${bamfiles[@]}; do echo -n "I=$s "; done) O="${outname}"
     echo "Merged bam file for sample ${mergedname} can be found at ${outname}" >&2
 }
 
