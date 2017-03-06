@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#PBS -l walltime=10:00:00,mem=16gb,nodes=1:ppn=8
+#PBS -m abe
+#PBS -M mfrodrig@umn.edu
+#PBS -q lab
+
+# Run this with qsub -t 0-7 mergeBam.sh
+
 set -eo pipefail
 
 #   Check for dependencies
@@ -11,6 +18,13 @@ $(command -v parallel > /dev/null 2> /dev/null) || (echo "Please install GNU Par
 OUT_DEFAULT="$(pwd -P)/merged"
 PICARD_DEFAULT="/usr/local/bin/picard.jar"
 declare -x DELIMITER=','
+
+#   FILL THESE OUT
+TABLE='' # Sample table
+SAMPLE_LIST='' # Sample list
+OUTDIR='' # Optional
+PICARD_JAR='' # Path to Picard JAR file
+
 
 #   Usage message
 function Usage() {
@@ -35,36 +49,36 @@ MergedName3    Old1        Old
     exit 1
 }
 
-#   Check for the required number of arguments
-[[ "$#" -lt 4 ]] && Usage
+# #   Check for the required number of arguments
+# [[ "$#" -lt 4 ]] && Usage
 
-#   Parse the arguments
-while [[ "$#" -gt 1 ]]
-do
-    KEY="$1"
-    case "${KEY}" in
-        -t|--table)
-            TABLE="$2"
-            shift
-            ;;
-        -s|--sample-list) # Sample list
-            SAMPLE_LIST="$2"
-            shift
-            ;;
-        -o|--outdirectory)
-            OUTDIR="$2"
-            shift
-            ;;
-        -p|--picard)
-            PICARD_JAR="$2"
-            shift
-            ;;
-        *)
-            Usage
-            ;;
-    esac
-    shift
-done
+# #   Parse the arguments
+# while [[ "$#" -gt 1 ]]
+# do
+#     KEY="$1"
+#     case "${KEY}" in
+#         -t|--table)
+#             TABLE="$2"
+#             shift
+#             ;;
+#         -s|--sample-list) # Sample list
+#             SAMPLE_LIST="$2"
+#             shift
+#             ;;
+#         -o|--outdirectory)
+#             OUTDIR="$2"
+#             shift
+#             ;;
+#         -p|--picard)
+#             PICARD_JAR="$2"
+#             shift
+#             ;;
+#         *)
+#             Usage
+#             ;;
+#     esac
+#     shift
+# done
 
 #   Argument checking
 [[ -z "${OUTDIR}" ]] && OUTDIR="${OUT_DEFAULT}"
@@ -105,4 +119,6 @@ function merge() {
 #   Export the function
 export -f merge
 
-parallel --verbose --xapply "merge ${SAMPLE_LIST} {1} ${OUTDIR} ${PICARD_JAR} {2}" ::: "${!SAMPLE_NAMES[@]}" ::: "${SAMPLE_NAMES[@]}"
+merge "${SAMPLE_LIST}" "${!SAMPLE_NAMES[$PBS_ARRAYID]}" "${OUTDIR}" "${PICARD_JAR}" "${SAMPLE_NAMES[$PBS_ARRAYID]}"
+
+# parallel --verbose --xapply "merge ${SAMPLE_LIST} {1} ${OUTDIR} ${PICARD_JAR} {2}" ::: "${!SAMPLE_NAMES[@]}" ::: "${SAMPLE_NAMES[@]}"
