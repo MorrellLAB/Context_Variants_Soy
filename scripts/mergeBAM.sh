@@ -107,12 +107,12 @@ function merge() {
     local picardjar="$4" # Where is our Picard JAR file?
     local -a samples=($(echo $5 | tr "${DELIMITER}" ' ')) # Make an array of old sample names
     #   Pick out our BAM files
-    local -a bamfiles=($(grep --color=never -f <(echo "${samples[@]}" | tr ' ' '\n') "${samplelist}"))
+    local -a bamfiles=($(grep --color=never -f <(echo ${samples[@]} | tr ' ' '\n') ${samplelist}))
     #   Create an output name
     local outname=""${outdir}/${mergedname}_merged.bam
     #   Merge the BAM files
     # (set -x; bamtools merge -list <(echo "${bamfiles[@]}" | tr ' ' '\n') > "${outdir}/${mergedname}_merged.bam")
-    (set -x; java -jar "${picardjar}" MergeSamFiles $(for s in ${bamfiles[@]}; do echo "I=$s "; done) O="${outname}")
+    (set -x; java -jar "${picardjar}" MergeSamFiles $(for s in ${bamfiles[@]}; do echo -n "I=$s "; done) O="${outname}")
     echo "Merged bam file for sample ${mergedname} can be found at ${outname}" >&2
 }
 
