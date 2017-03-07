@@ -21,7 +21,7 @@ PICARD_DEFAULT="/usr/local/bin/picard.jar"
 declare -x DELIMITER=','
 
 #   FILL THESE OUT
-TABLE=/panfs/roc/scratch/fernanda/FN30/SAM_Processing/SAMtools/Sorted_BAM/reheader/FN30_sample_names_unix.txt
+TABLE=/panfs/roc/scratch/fernanda/FN30/SAM_Processing/SAMtools/Sorted_BAM/reheader/FN30_sample_names_unix.txt # Table should have only one line
 SAMPLE_LIST=/panfs/roc/scratch/fernanda/FN30/SAM_Processing/SAMtools/Sorted_BAM/reheader/sorted_reheader_BAM.txt
 OUTDIR='' # Optional
 PICARD_JAR=/panfs/roc/groups/9/morrellp/shared/Software/GATK-3.6/GenomeAnalysisTK.jar
@@ -120,6 +120,7 @@ function merge() {
 #   Export the function
 export -f merge
 
-(set -x; merge "${SAMPLE_LIST}" "${!SAMPLE_NAMES[$PBS_ARRAYID]}" "${OUTDIR}" "${PICARD_JAR}" "${SAMPLE_NAMES[$PBS_ARRAYID]}")
+# (set -x; merge "${SAMPLE_LIST}" "${!SAMPLE_NAMES[$PBS_ARRAYID]}" "${OUTDIR}" "${PICARD_JAR}" "${SAMPLE_NAMES[$PBS_ARRAYID]}")
+(set -x; merge "${SAMPLE_LIST}" "${!SAMPLE_NAMES[@]}" "${OUTDIR}" "${PICARD_JAR}" "${SAMPLE_NAMES[@]}")
 
 # parallel --verbose --xapply "merge ${SAMPLE_LIST} {1} ${OUTDIR} ${PICARD_JAR} {2}" ::: "${!SAMPLE_NAMES[@]}" ::: "${SAMPLE_NAMES[@]}"
