@@ -1,22 +1,39 @@
 #!/bin/bash
 
+#PBS -l walltime=10:00:00,mem=16gb,nodes=1:ppn=8
+#PBS -m abe
+#PBS -M mfrodrig@umn.edu
+#PBS -q lab
+
+# Run this with qsub -t 0-7 mergeBAM.sh
+
+module load parallel
 set -eo pipefail
 
 #   Check for dependencies
-$(command -v bamtools > /dev/null 2> /dev/null) || (echo "Please install BAMtools for this script" >&2; exit 1)
+# $(command -v bamtools > /dev/null 2> /dev/null) || (echo "Please install BAMtools for this script" >&2; exit 1)
+$(command -v java > /dev/null 2> /dev/null) || (echo "Please install Java for this script" >&2; exit 1)
 $(command -v parallel > /dev/null 2> /dev/null) || (echo "Please install GNU Parallel for this script" >&2; exit 1)
 
 #   Some useful global variables
 OUT_DEFAULT="$(pwd -P)/merged"
-declare -x DELIMETER=','
+PICARD_DEFAULT="/usr/local/bin/picard.jar"
+declare -x DELIMITER=','
+
+#   FILL THESE OUT
+TABLE=/panfs/roc/scratch/fernanda/FN30/SAM_Processing/SAMtools/Sorted_BAM/reheader/FN30_sample_names_unix.txt # Table should have only one line
+SAMPLE_LIST=/panfs/roc/scratch/fernanda/FN30/SAM_Processing/SAMtools/Sorted_BAM/reheader/sorted_reheader_BAM.txt
+OUTDIR='' # Optional
+PICARD_JAR=/panfs/roc/groups/9/morrellp/shared/Software/GATK-3.6/GenomeAnalysisTK.jar
 
 #   Usage message
 function Usage() {
     echo -e "\
-Usage: $0 -t|--table <table> -s|--sample-list <sample list> [-o|--outdirectory <outdirectory> \n\
+Usage: $0 -t|--table <table> -s|--sample-list <sample list> [-o|--outdirectory <outdirectory>] [-p|--picard <picard jar>]\n\
 Where:      <table> is the sample name table (see below) \n\
             <sample list> is a list of BAM files, named with the sample names in <table> \n\
             [<outdirectory>] is an optional output directory, defaults to ${OUT_DEFAULT} \n\
+            [<picard jar>] is an optional path to the Picard JAR, defaults to ${PICARD_DEFAULT} \n\
 \n\
 The sample name table is a whitespace-delimited table where the new sample name \n\
     is in the first column and the old sample names are in subsequent columns \n\
@@ -32,35 +49,41 @@ MergedName3    Old1        Old
     exit 1
 }
 
-#   Check for the required number of arguments
-[[ "$#" -lt 4 ]] && Usage
+# #   Check for the required number of arguments
+# [[ "$#" -lt 4 ]] && Usage
 
-#   Parse the arguments
-while [[ "$#" -gt 1 ]]
-do
-    KEY="$1"
-    case "${KEY}" in
-        -t|--table)
-            TABLE="$2"
-            shift
-            ;;
-        -s|--sample-list) # Sample list
-            SAMPLE_LIST="$2"
-            shift
-            ;;
-        -o|--outdirectory )
-            OUTDIR="$2"
-            shift
-            ;;
-        *)
-            Usage
-            ;;
-    esac
-    shift
-done
+# #   Parse the arguments
+# while [[ "$#" -gt 1 ]]
+# do
+#     KEY="$1"
+#     case "${KEY}" in
+#         -t|--table)
+#             TABLE="$2"
+#             shift
+#             ;;
+#         -s|--sample-list) # Sample list
+#             SAMPLE_LIST="$2"
+#             shift
+#             ;;
+#         -o|--outdirectory)
+#             OUTDIR="$2"
+#             shift
+#             ;;
+#         -p|--picard)
+#             PICARD_JAR="$2"
+#             shift
+#             ;;
+#         *)
+#             Usage
+#             ;;
+#     esac
+#     shift
+# done
 
 #   Argument checking
 [[ -z "${OUTDIR}" ]] && OUTDIR="${OUT_DEFAULT}"
+[[ -z "${PICARD_JAR}" ]] && PICARD_JAR="${PICARD_DEFAULT}"
+[[ -f "${PICARD_JAR}" ]] || (echo "Cannot find Picard JAR file at ${PICARD_JAR}, please provide path to Picard JAR file" >&2; exit 1)
 [[ -f "${SAMPLE_LIST}" ]] || (echo "Cannot find ${SAMPLE_LIST}, exiting..." >&2; exit 1)
 [[ -f "${TABLE}" ]] || (echo "Cannot find ${TABLE}, exiting..." >&2; exit 1)
 
@@ -73,7 +96,7 @@ while read line
 do
     name=$(echo "${line}" | tr '[:space:]' ' ' | cut -f 1 -d ' ')
     [[ "${name:0:1}" == '#' ]] && continue
-    SAMPLE_NAMES["${name}"]="$(echo ${line} | tr '[:space:]' ${DELIMETER} | cut -f 2- -d ${DELIMETER})"
+    SAMPLE_NAMES["${name}"]="$(echo ${line} | tr '[:space:]' ${DELIMITER} | cut -f 2- -d ${DELIMITER})"
 done < "${TABLE}"
 
 #   A function to merge the files
@@ -81,15 +104,23 @@ function merge() {
     local samplelist="$1" # Where is our sample list?
     local mergedname="$2" # What is the name of our merged sample?
     local outdir="$3" # Where do we put our output file?
-    local -a samples=($(echo $4 | tr "${DELIMETER}" ' ')) # Make an array of old sample names
+    local picardjar="$4" # Where is our Picard JAR file?
+    exit 8
+    local -a samples=($(echo $5 | tr "${DELIMITER}" ' ')) # Make an array of old sample names
     #   Pick out our BAM files
-    local -a bamfiles=($(grep --color=never -f <(echo "${samples[@]}" | tr ' ' '\n') "${samplelist}"))
+    local -a bamfiles=($(grep --color=never -f <(echo ${samples[@]} | tr ' ' '\n') ${samplelist}))
+    #   Create an output name
+    local outname=""${outdir}/${mergedname}_merged.bam
     #   Merge the BAM files
-    (set -x; bamtools merge -list <(echo "${bamfiles[@]}" | tr ' ' '\n') > "${outdir}/${mergedname}_merged.bam")
-    echo "Merged bam file for sample ${mergedname} can be found at ${outdir}/${mergedname}_merged.bam" >&2
+    # (set -x; bamtools merge -list <(echo "${bamfiles[@]}" | tr ' ' '\n') > "${outdir}/${mergedname}_merged.bam")
+    java -jar "${picardjar}" MergeSamFiles $(for s in ${bamfiles[@]}; do echo -n "I=$s "; done) O="${outname}"
+    echo "Merged bam file for sample ${mergedname} can be found at ${outname}" >&2
 }
 
 #   Export the function
 export -f merge
 
-parallel --verbose --xapply "merge ${SAMPLE_LIST} {1} ${OUTDIR} {2}" ::: "${!SAMPLE_NAMES[@]}" ::: "${SAMPLE_NAMES[@]}"
+# (set -x; merge "${SAMPLE_LIST}" "${!SAMPLE_NAMES[$PBS_ARRAYID]}" "${OUTDIR}" "${PICARD_JAR}" "${SAMPLE_NAMES[$PBS_ARRAYID]}")
+(set -x; merge "${SAMPLE_LIST}" "${!SAMPLE_NAMES[@]}" "${OUTDIR}" "${PICARD_JAR}" "${SAMPLE_NAMES[@]}")
+
+# parallel --verbose --xapply "merge ${SAMPLE_LIST} {1} ${OUTDIR} ${PICARD_JAR} {2}" ::: "${!SAMPLE_NAMES[@]}" ::: "${SAMPLE_NAMES[@]}"
