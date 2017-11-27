@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# QSUB PBS definitions, in order
+# send message (email below) if abort/begining job/exit happens
+#
+# which computer I'm submiting job to
+# we are requesting 1 entire node (24 ppn is the whole node)
+
+#PBS -m abe
+#PBS -M mfrodrig@umn.edu
+#PBS -q mesabi
+#PBS -l mem=24gb,nodes=1:ppn=24,walltime=90:00:00
+
+set -e # Exit upon error
+set -o pipefail # Exit if command in a pipe fails
+
+module load parallel        # GNU parallel tool that execute jobs in parallel to save time
+module load sratoolkit      # sratoolkit was written by NCBI; allows you to programmatically access data housed within SRA and convert it from the SRA format to fastq format (fastq_dump is part of the tool)
+
+sample_list=/panfs/roc/scratch/fernanda/baseline/SRA_Files      # path to sample file, and we are calling it sample_list
+outdirectory=/panfs/roc/scratch/fernanda/baseline/FastQ     # we called our output file "outdirectory", and determined that it will deposited in a directory called FastQ, located in /panfs/roc/scratch/fernanda/baseline
+
+mkdir -p ${outdirectory} # Make the directory and all parents if they don't yet exist
+
+# "parallel" runs job in parallel
+# "--verbose" prints the command before running it
+# "fastq-dump --gzip --split-files -F -I --outdir ${outdirectory} {}" is the command that will run in parallel
+# "::::" Instead of -a files can be given after ::::
+# ${sample_list} add $ because sample_list is a variable, defined above.  In the future we can use a different file with the sample list, but we won't need to chance the code, just update above - it's more generic
+
+parallel --verbose "fastq-dump --gzip --split-files -F -I --outdir ${outdirectory} {}" :::: ${sample_list}
