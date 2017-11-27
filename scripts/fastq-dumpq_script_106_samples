@@ -8,8 +8,8 @@
 
 #PBS -m abe
 #PBS -M mfrodrig@umn.edu
-#PBS -q mesabi
-#PBS -l mem=24gb,nodes=1:ppn=24,walltime=90:00:00
+#PBS -q lab
+#PBS -l mem=22gb,nodes=1:ppn=16,walltime=24:00:00
 
 set -e # Exit upon error
 set -o pipefail # Exit if command in a pipe fails
