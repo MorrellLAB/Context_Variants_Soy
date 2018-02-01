@@ -1,0 +1,707 @@
+#!/bin/bash
+
+#    Corey Carter, St. Paul, MN - 09 January 2018
+#    This bash script is designed to pull contextual sequence flanking a SNP (variants) from a reference genome.
+#    The window size for contextual sequence can be user specificed.
+#    The program checks for the presence of more than one variant within user specified windows.
+
+#     A bash dictionary for input parameters
+declare -A projectDic=(
+    ["windowLength"]=0 #-w
+    ["inputFile"]='' #-i
+    ["inputLoc"]=''
+    ["outputLoc"]='' #-o
+    ["filename"]=''
+    ["projectName"]='out' #-p
+    ["flanks"]=0 #-f
+    ["referenceGenome"]='' #-r
+    ["OperationalStage"]='vcfTObed'
+    ["nMax"]=0 ##-n
+    ["JOB"]='NO_JOB_NOW'
+    ["TempLoc"]=''
+    ["tempOut"]=''
+    ["allData"]='false' #-ad
+    
+)
+
+#     A bash list of all possible nucleotide state transitions
+declare -a dirL=('AtoC' 'AtoG' 'AtoT' 'CtoA' 'CtoG' 'CtoT' 'GtoA' 'GtoC' 'GtoT' 'TtoA' 'TtoC' 'TtoG')
+
+declare -a active=()
+
+#     Takes user arguments from command line and assigns values to dictionary keys in 'projectDic'
+starter(){ #grabs the arguments
+    local args=("$@")
+    if [[ "$#" > 1 ]] && [[ ${args[0],,} != "--help" ]] && [[ ${args[0],,} != "-h" ]]; then
+        local frontgate=0
+        local indexPos=0
+        for i in $@; do
+            if [[ "${i,,}" == "-w" ]]; then ##Window expansion size
+                local var=${args[${indexPos}+1]}
+                if [[ "$var" =~ ^[0-9]+$ ]]; then ##Checks if it's a number, max expansion of 1000.
+                    if (( "$var" >= 2)); then
+                        ((projectDic["windowLength"]+="$var"))
+                        frontgate=1
+                    fi
+                else
+                    echo -e "\nPlease enter a valid integer for window expansion size, defaulting to FIVE bases.\n"
+                fi
+            elif [[ "${i,,}" == "-i" ]]; then ##Input file which grabs the input file name, location and complete file path 
+                local var=${args[${indexPos}+1]}
+                if [[ "${var##*.}" == "vcf" ]] && [ -f "$var" ]; then ##Checks if it's VCF and if file exist
+                    projectDic["inputFile"]+="$var"
+                    projectDic["inputLoc"]+="${var%/*}"
+                    local filename=${var%.*} ##removes files extension
+                    filename=${filename##*/} ##removes file path
+                    projectDic["filename"]+="$filename"
+                    frontgate=1
+                else
+                    echo -e "\nERROR. Incorrect file input. Check file or directory path. (Input (.vcf) only)\nEXITING...\n"
+                    exit 1
+                fi
+            elif [[ "${i,,}" == "-o" ]]; then ##output location info
+                local var=${args[${indexPos}+1]}
+                if [ -d "$var" ]; then ##Checks if directory exist, if not it will save to input file location
+                    if [[ "${var: -1}" == "/" ]]; then
+                        projectDic["outputLoc"]+="$var"
+                    else
+                        projectDic["outputLoc"]+="$var"/
+                    fi
+                    frontgate=1
+                fi
+            elif [[ "${i,,}" == "-p" ]]; then ##Project name
+                local var=${args[${indexPos}+1]}
+                projectDic["projectName"]="$var"
+                frontgate=1
+            elif [[ "${i,,}" == "-f" ]]; then ##Flank sizes for mutation motif's aln_to_counts func
+                local var=${args[${indexPos}+1]}
+                frontgate=1
+                if [[ "$var" =~ ^[0-2]+$ ]]; then ##Checks if it's a number and if it's between 0 and 2
+                    ((projectDic["flanks"]+="$var"))
+                else
+                    echo -e "\nFlanks have to be between: 0 - 2. Defaulting to 0.\n"
+                fi
+            elif [[ "${i,,}" == "-r" ]]; then ##Which reference genome needed for FASTA file creation
+                local var=${args[${indexPos}+1]}
+                referenceAssignment ${var}
+                frontgate=1
+            elif [[ "${i}" == "-JOB" ]]; then
+                local var=${args[${indexPos}+1]}
+                projectDic["JOB"]="${var}"
+            elif [[ "${i,,}" == "-n"  ]]; then
+                local var=${args[${indexPos}+1]}
+                if [[ "$var" =~ ^[0-9]+$ ]]; then
+                    if (( "${var}" >= 25  && "$var" <= 100 )); then
+                        ((projectDic["nMax"]+="$var"))
+                    elif (( "${var}" < 25 )); then
+                        echo -e "\nMinimum N threshold is 25. Defaulting to 25% threshold."
+                        ((projectDic["nMax"]+=25))
+                    elif (( "${var}" > 100 )); then
+                        echo -e "\nMaximum N threshold is 100. Defaulting to 100% threshold."
+                        ((projectDic["nMax"]+=100))
+                    fi
+                    frontgate=1                    
+                fi
+            elif [[ "${i,,}" == "-ad"  ]]; then
+                local var=${args[${indexPos}+1]}
+                projectDic["allData"]="${var,,}"
+                frontgate=1
+            fi
+            ((indexPos+=1))
+        done
+        if ((${frontgate} <= 0)); then
+            echo -e "\nPlease enter valid arguments. None where valid.\n"
+        fi
+        if [[ ${projectDic["inputFile"]} == '' ]]; then
+            echo -e "\nNo input file or working directory specified.\nEXITING...\n"
+            exit 1
+        fi
+        if [[ -z ${projectDic["outputLoc"]} ]] && [[ ${projectDic["inputFile"]} != '' ]]; then
+            echo -e "\nNot a valid output location. Re-routing to input file location.\n"
+            projectDic["outputLoc"]+=${projectDic["inputLoc"]}
+        fi
+        if [[ ${projectDic["referenceGenome"]} == "" ]]; then
+            referenceAssignment ##Function call
+        fi
+        if (( ${projectDic["nMax"]} == 0 )); then
+            ((projectDic["nMax"]+=25))
+        fi
+    else
+        local helpPrintOut=$'\n\tSNP context\n\tList of commands:\n\t------------------------\n'
+        helpPrintOut+=$'\n\t./SNPcontext -i <input> -o <output> -r <reference genome> -w <expansion size> -f <alignment window flank]> -p <project name>\n'
+        helpPrintOut+=$'\n\t------------------------\n'
+        helpPrintOut+=$'\n\t-i [File input, VCF only]\n\t-o [output location (defaults to input location if not stated)]'
+        helpPrintOut+=$'\n\t-r [Reference genome]\n\t-w [window expansion size]\n\t-f [mutation motif window flank]'
+        helpPrintOut+=$'\n\t-p [project name]\n\t-n [max percentage of indels allowed in fasta files]'
+        helpPrintOut+=$'\n\t-a [(true/false) Do you want all temp file(vcf,bed and fasta files) to be saved in output directory]'
+        echo "$helpPrintOut"
+        exit -0
+    fi
+}
+
+#     Current reference genomes for barley and soybean are hard coded here. For other species or reference updates,
+#     this will need to be changed.
+referenceAssignment(){
+    if [[ ${var,,} == "barley" ]] || [[ ${var,,} == "b" ]]; then ##forced lowercase with ,,
+        projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
+    elif [[ ${var,,} == "soy bean" ]] || [[ ${var,,} == "s" ]] || [[ ${var,,} == "soy" ]]; then
+        projectDic["referenceGenome"]+="panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa"
+    else
+        echo -e "\nPlease enter a valid reference genome. Defaulting to Barley reference.\n"
+        projectDic["referenceGenome"]+='/home/morrellp/shared/References/Reference_Sequences/Barley/Morex/barley_RefSeq_v1.0/150831_barley_pseudomolecules.fasta'
+    fi
+}
+
+#    Loading modules on UMN MSI system. Three of the four are maintained by Morrell Lab (Corey Carter).
+#    Will need to be changed for use outside UMN/MSI
+moduleLoader(){ #load modules need for operations
+
+    module load R
+    module load python3_ML/3.6.1
+    module load bedops_ML/2.4.20
+    module load bedtools_ML/2.23.0
+
+}
+
+#    Performing vcf to bed conversion using bedops 'vcf2bed' function
+fileConverter(){
+    if [ "${projectDic[OperationalStage]}" == "vcfTObed" ]; then ##Key and new input LOCATION
+        local temp="${projectDic["tempOut"]}"SPLITVCF/
+        local splitDir=("${temp}"*_split_"${projectDic[filename]}".vcf*)
+        for gene in "${splitDir[@]}"; do
+            local targetVCF="${gene%.*}"
+            targetVCF="${targetVCF##*/}"
+            vcf2bed < "${gene}" > "${projectDic["tempOut"]}"BED_SPLIT/"${targetVCF}".bed & ##sort later
+        done
+        wait
+        projectDic[OperationalStage]="bedTOfasta"
+    #    Takes a reference genome and bed file and generates small fasta files from reference genome intervals
+    elif [ "${projectDic[OperationalStage]}" == "bedTOfasta" ]; then
+        local temp="${projectDic["tempOut"]}"BED_SPLIT/
+        local splitDir=("${temp}"*"${projectDic[filename]}"_new_interval.bed*)
+        for gene in "${splitDir[@]}"; do
+            local targetBED="${gene%.*}"
+            targetBED="${targetBED##*/}"
+            targetBED=${targetBED:0:4}
+            bedtools getfasta -fi "${projectDic["referenceGenome"]}" -bed "${gene}" -fo "${projectDic["tempOut"]}"FASTA_SPLIT/"${targetBED}"_"${projectDic[filename]}".fasta &
+        done
+        wait
+        projectDic[OperationalStage]="alnToCounts"
+    elif [ "${projectDic[OperationalStage]}" == "alnToCounts" ]; then
+        local temp="${projectDic["tempOut"]}"FASTA_SPLIT/
+        local splitDir=("${temp}"*_"${projectDic[filename]}".fasta*)
+        echo -e "creating counts tables..."
+        for gene in "${splitDir[@]}"; do
+            local countfile="${gene%.*}"
+            countfile="${countfile##*/}"
+            local geneDirection=${countfile:0:4}
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"
+            mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS
+            for loopGene in "${dirL[@]}"; do
+                aln_to_counts --align_path "${gene}" --output_path "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/ --flank_size "${projectDic[flanks]}" --direction "${loopGene}" -F > /dev/null
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${countfile}".txt "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".txt
+                mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/*.log* "${projectDic[outputLoc]}"COUNTS_TABLES/"${geneDirection}"/LOGS/"${loopGene}"_"${geneDirection^^}"_"${projectDic[filename]}".log ##FIX Unique Log ID'S            
+            done
+            active+=("${geneDirection}")
+        done
+        projectDic["OperationalStage"]="allCounts"
+    elif [ "${projectDic[OperationalStage]}" == "allCounts" ]; then
+        echo -e "creating combined tables..."
+        mkdir "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS
+        for loopGene in "${active[@]}"; do
+            cd "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/
+            all_counts -c "*.txt*" -o "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/ > /dev/null 
+            mv "${projectDic[outputLoc]}"COUNTS_TABLES/"${loopGene}"/combined_counts.txt "${projectDic[outputLoc]}"COUNTS_TABLES/COMBINED_COUNTS/"${loopGene}"_combined_counts.txt
+        done
+        projectDic["OperationalStage"]="DONE..."
+    fi
+
+}
+
+#    Creates output directories
+dirStructure(){
+    DATE=`date +"%m%d%Y-%H%M"`
+    mkdir "${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+    projectDic["outputLoc"]="${projectDic["outputLoc"]}""${projectDic["projectName"]^^}"_"${DATE}"/
+    mkdir "${projectDic[outputLoc]}"COUNTS_TABLES
+    if [[ ${projectDic["allData"]} == "true" ]]; then
+        mkdir "${projectDic[outputLoc]}"SPLITVCF
+        mkdir "${projectDic[outputLoc]}"FASTA_SPLIT
+        mkdir "${projectDic[outputLoc]}"BED_SPLIT
+        projectDic["tempOut"]="${projectDic[outputLoc]}"
+    elif [[ ${projectDic["allData"]} == "false" ]];then
+        projectDic["TempLoc"]+=$(mktemp -d)
+        mkdir "${projectDic[TempLoc]}"/SPLITVCF
+        mkdir "${projectDic[TempLoc]}"/FASTA_SPLIT
+        mkdir "${projectDic[TempLoc]}"/BED_SPLIT
+        projectDic["tempOut"]="${projectDic["TempLoc"]}"/
+    fi
+}
+
+#    This is Python 3 code embedded in the bash script
+#    Expands coverage windows based on user-specified intervals
+#    Also checks for "Type One" and "Type Two" overlaps
+#    A "Type One overlap" is another SNP within immediate contextual sequence
+#    A "Type Two overlap" is another SNP within the expanded flanking contextual sequencing
+pythonBEDScanner(){
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" interval="${projectDic["windowLength"]}" geneDir="$geneDir" python3.6 - <<END_OF_PYTHON
+    
+import os
+from itertools import chain
+# import itertools
+import datetime
+
+def bedMapper(interval, outputLoc, projectName, filename, geneDir):
+    bedMapper=[]
+    masterList=[]
+    sub=[] ##FOR BEDMAPPER
+    temp=[] ##FOR MASTERLIST
+    final=''
+    with open(outputLoc + "BED_SPLIT/" + geneDir + "_split_" + filename + ".bed", "rb") as bed_test: ##Change to input variables
+        bedmap=bed_test.read()
+        for asii in bedmap:
+            element = chr(asii)
+            if((element != '\t') and (element != '\n')):
+                final = final + element
+            elif((element == '\t') and (element != '\n')):
+                sub.append(final)
+                final=''
+                sub.append(element)
+            if(element == "\n"):
+                sub.append(final)
+                sub.append(element)
+                intSize = int(sub[4]) - int(sub[2])
+                if(interval >= 8):
+                    sub[2] = str(int(sub[2]) - interval)
+                    sub[4] = str(int(sub[4]) + interval)
+                else:
+                    diffInt = abs(18 - intSize)
+                    if(diffInt < 17):
+                        if(diffInt % 2 != 0):
+                            diffInt+=1
+                        sub[2] = str(int(sub[2]) - (diffInt//2))
+                        sub[4] = str(int(sub[4]) + (diffInt//2))
+                    else:
+                        sub[2] = str(int(sub[2]) - 8)
+                        sub[4] = str(int(sub[4]) + 8)                  
+                a = sub[2]
+                b = sub[4]
+                temp.append(int(a))
+                temp.append(int(b))
+                temp.sort()
+                bedMapper.append(sub)
+                masterList.append(temp)
+                final=''
+                sub=[]
+                temp=[]
+        return(bedMapper, masterList)
+
+def binaryIntersect(expandedList, interval, outputLoc, projectName, filename, geneDir, baseOut):
+    gateA=True
+    gateB=True
+    now = datetime.datetime.now()
+    results = '\n**********************\nTYPE ONE and TYPE TWO CHECKS FOR: ' + geneDir + " ON " + now.strftime("%Y-%m-%d, %H:%M") + '\n----------------------------------------------------\n' ##ADD PROJECT NAME TO THIS
+    resultsA = '\n**' + geneDir + ' TYPE ONE: OVERLAPS INTO ORIGINAL SNPs**\n------------------------------------\n'
+    resultsB = '\n**' + geneDir + ' TYPE TWO: OVERLAPS INTO SNP EXPANSION WINDOWS**\n-------------------------------------\n'
+    for i in range(len(expandedList)-1): #Checks for Type One SNP overlaps (ORIGINAL INTERVAL CHECK)
+            a=expandedList[i][0] ##A= left side
+            b=expandedList[i][1] ##B= right side
+            if(interval >= 8): ####
+                intervalDiff = interval - (interval - 3)
+                subTA=expandedList[i+1][0]+(interval) ##TYPE ONE
+                subTB=expandedList[i+1][1]-(interval) ##TYPE ONE
+                subTA-=2
+                subTB+=2
+            else:
+                subTA=expandedList[i+1][0]+6 ##TYPE ONE
+                subTB=expandedList[i+1][1]-6 ##TYPE ONE
+            subMA=expandedList[i+1][0] ##TYPE TWO
+            subMB=expandedList[i+1][1] ##TYPE TWO
+            binary=[0,0,0,0]
+            binaryMB=[0,0,0,0]
+            if(a <= subTA):
+                binary[0]=1
+            if(a <= subTB):
+                binary[1]=1
+            if(b >= subTA):
+                binary[2]=1
+            if(b >= subTB):
+                binary[3]=1
+            if(a <= subMA): ##
+                binaryMB[0]=1
+            if(a <= subMB):
+                binaryMB[1]=1
+            if(b >= subMA):
+                binaryMB[2]=1
+            if(b >= subMB):
+                binaryMB[3]=1
+            if((binary != [1,1,0,0]) and (binary != [0,0,1,1])):
+                gateA=False
+                if(binary == [0,1,1,0]):
+                    resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subTA) + "-" + str(subTB) + '.'
+                elif(binary == [1,1,1,1]):
+                    resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subTA) + "-" + str(subTB) + '.'
+                elif((binary == [1,1,1,0]) or (binary == [0,1,1,1])):
+                    if(binary == [1,1,1,0]):
+                        resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the right, between " + str(b) + " and " + str(subTA) + '.'
+                    elif(binary == [0,1,1,1]):
+                        resultsA+="\n--TYPE ONE at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subTA) + "-" + str(subTB) + ". on the left, between " + str(a) + " and " + str(subTB) + '.' 
+            if(interval > 2):
+                if((binaryMB != [1,1,0,0]) and (binaryMB != [0,0,1,1])):
+                    gateB=False
+                    if(binaryMB == [0,1,1,0]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " SNP is encapsulated within " + str(subMA) + "-" + str(subMB) + '.'
+                    elif(binaryMB == [1,1,1,1]):
+                        resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is equal or encapsulating " + str(subMA) + "-" + str(subMB) + '.'
+                    elif((binaryMB == [1,1,1,0]) or (binaryMB == [0,1,1,1])):
+                        if(binaryMB == [1,1,1,0]):
+                            resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the right, between " + str(b) + " and " + str(subMA) + '.'
+                        elif(binaryMB == [0,1,1,1]):
+                            resultsB+="\n--TYPE TWO at : " + str(a) + "-" + str(b) + " is overlapping with " + str(subMA) + "-" + str(subMB) + ". on the left, between " + str(a) + " and " + str(subMB) + '.' 
+    if(gateA):
+        resultsA+="\nNo Type ONE window overlaps detected.\n"
+    if(gateB):
+        resultsB+="\nNo Type TWO window overlaps detected.\n"
+    results += resultsA + "\n" + resultsB + "\n"
+    results += "\nEND OF INTERVAL CHECKS.\nXXXXXXXXXXXXXXXXXXXXXX\n"
+    with open(baseOut + projectName + "_" + "WindowOverlap.txt", 'a+') as window:
+        window.write(results)
+
+def fileSaver(bedMapp, outputLoc, filename, projectName, geneDir):
+        output="".join(chain.from_iterable(bedMapp))
+        with open(outputLoc + "BED_SPLIT/" + geneDir + "_" + filename + "_new_interval.bed", "w") as newBed: ##Change to input variables
+            newBed.write(output)
+        
+def bashInputs():
+    outputLoc=str(os.environ['outputLoc'])
+    filename=str(os.environ['filename'])
+    interval=int(os.environ['interval'])
+    inputFile=str(os.environ['inputFile'])
+    projectName=str(os.environ['projectName'])
+    geneDir=str(os.environ['geneDir'])
+    baseOut=str(os.environ['baseOut'])
+    return(outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut)
+
+def main():
+    outputLoc, filename, interval, inputFile, projectName, geneDir, baseOut=bashInputs()
+    bedmap, masterList=bedMapper(interval, outputLoc, projectName, filename, geneDir)
+    binaryIntersect(masterList, interval, outputLoc, projectName, filename, geneDir, baseOut)
+    fileSaver(bedmap, outputLoc, filename, projectName, geneDir)
+main()
+
+END_OF_PYTHON
+
+}
+
+jobCreator(){
+    echo -e "Enter email for PBS job updates: "
+    read userEmail
+    # ssh mesabi
+    email="${userEmail}" nMax="${projectDic["nMax"]}" allData="${projectDic["allData"]}" inputFile="${projectDic["inputFile"]}" outputLoc="${projectDic["outputLoc"]}" projectName="${projectDic["projectName"]}" windowLength="${projectDic["windowLength"]}" flanks="${projectDic["flanks"]}" referenceGenome="${projectDic["referenceGenome"]}" python3.6 - <<JOB_CREATED
+
+import os
+
+def jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax):
+    job="#!/bin/bash -l\n\n#PBS -l mem=20gb,nodes=1:ppn=4,walltime=24:00:00\n#PBS -m abe\n#PBS -M " + email + "\n"
+    job+="#PBS -N " + projectName + "_" + "SNP-Context" + "\n#PBS -q small\nset -e\nset -o pipefail\n\n"
+    job+="#PBS -o " + outputLoc + "_" + projectName + "\n#PBS -e " + outputLoc + "_" + projectName + "\n"
+    job+="\nmodule load snpContext/1.0.0\n\n"
+    # job+="snpcontext "
+    job+="/panfs/roc/groups/9/morrellp/public/Software/SNP_Context/SNPcontext "
+    job+= "-i " + inputFile + " "
+    job+= "-o " + outputLoc + " "
+    job+= "-w " + windowLength + " "
+    job+= "-f " + flanks + " "
+    job+= "-p " + projectName + " "
+    job+= "-r " + referenceGenome + " "
+    job+= "-ad " + allData + " "
+    job+= "-j " + nMax + " "
+    job+= "-JOB THIS_IS_A_JOB"
+
+    with open(outputLoc + projectName + ".job", "w") as jobScript:
+        jobScript.write(job)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    email=str(os.environ['email'])
+    flanks=str(os.environ['flanks'])
+    referenceGenome=str(os.environ['referenceGenome'])
+    windowLength=str(os.environ['windowLength'])
+    inputFile=str(os.environ['inputFile'])
+    projectName=str(os.environ['projectName'])
+    allData=str(os.environ['allData'])
+    nMax=str(os.environ['nMax'])
+    return(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
+
+def main():
+    projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax = bashImport()
+    jobScript(projectName, inputFile, windowLength, referenceGenome, flanks, email, outputLoc, allData, nMax)
+
+main()
+    
+JOB_CREATED
+
+qsub "${projectDic["outputLoc"]}""${projectDic["projectName"]}".job
+# echo -e "Enter Mesabi password: "
+# ssh carte731@login03 '/usr/local/bin/qsub ~/pipelineProject/Pipeline/SNPcontext'
+echo -e "\njob submited.\nEXITING...\n"
+exit 0
+
+}
+
+vcfSplit(){
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" projectName="${projectDic["projectName"]}" python3.6 - <<VCF_SPLIT_END
+
+import os
+
+def vcfSegments(inputFile):
+    geneDir={
+
+        'AtoC':[],
+        'AtoG':[],
+        'AtoT':[],
+        'CtoA':[],
+        'CtoG':[],
+        'CtoT':[],
+        'GtoA':[],
+        'GtoC':[],
+        'GtoT':[],
+        'TtoA':[],
+        'TtoC':[],
+        'TtoG':[],
+        'rejected':[],
+
+    }
+    
+    with open(inputFile, "rb") as raw:
+        commentGate=False
+        test=raw.read()
+        sub=[]
+        header=''
+        results=''
+        for ele in test:
+            element=chr(ele)
+            if(element == "#"):
+                commentGate=True
+            if((commentGate == False)):
+                if((element != '\t') and (element != '\n')):
+                    results = results + element
+                elif((element == '\t') and (element != '\n')):
+                    sub.append(results)
+                    results=''
+                    sub.append(element)
+                if(element == "\n"):
+                    results = results + element
+                    sub.append(results)
+                    gene= str(sub[6]) + "to" + str(sub[8])
+                    if gene in geneDir:
+                        geneDir[gene]+=sub
+                        results=''
+                        sub=[]
+                    else:
+                        geneDir['rejected']+=sub
+                        results=''
+                        sub=[]
+            else:
+                header+=element
+                if(element == "\n"):
+                    commentGate=False
+    return(header, geneDir)
+
+def vcfSpliter(header, geneDir, outputLoc, filename, baseOut):
+    for key in geneDir:
+        output=''
+        if(geneDir[key] != []):
+            if(key != "rejected"):
+                with open(outputLoc + "SPLITVCF/" + key + "_split_" + filename + ".vcf","w") as vcfOut:
+                    output+=header
+                    output+="".join(geneDir[key])
+                    vcfOut.write(output)
+            else:
+                with open(baseOut + "REJECTEDVCFs_" + filename + ".vcf","w") as vcfOut:
+                    output+=header
+                    output+="".join(geneDir[key])
+                    vcfOut.write(output)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    inputFile=str(os.environ['inputFile'])
+    filename=str(os.environ['filename'])
+    projectName=str(os.environ['projectName'])
+    baseOut=str(os.environ['baseOut'])
+    return(projectName, inputFile, outputLoc, filename, baseOut)
+
+def main():
+    projectName, inputFile, outputLoc, filename, baseOut=bashImport()
+    header, geneDir=vcfSegments(inputFile)
+    vcfSpliter(header, geneDir, outputLoc, filename, baseOut)
+
+main()
+
+VCF_SPLIT_END
+
+}
+
+fastaScanner(){
+
+    inputFile="${projectDic["inputFile"]}" baseOut="${projectDic["outputLoc"]}" outputLoc="${projectDic["tempOut"]}" filename="${projectDic["filename"]}" geneTwo=${geneTwo} geneDirTwo="${geneDirTwo}" nMax="${projectDic["nMax"]}" windowLength="${projectDic["windowLength"]}" python3.6 - <<FASTA_SWEEP
+    
+from itertools import chain
+import os
+
+def fastaMapper(gene):
+    with open(gene ,"rb") as fasta:
+        fastafile=fasta.read()
+        totalN=0
+        master=[]
+        sub=[]
+        final=''
+        for counter, i in enumerate(fastafile):
+            element=chr(i)
+            if(element == 'N'):
+                totalN+=1
+            if((element != "\n") and (element != ">")):
+                final = final + str(element)
+            if((element == "\n") and (element != ">")):
+                final = final + str(element)
+                sub.append(final)
+                final=''
+            if((element == ">") and (element != "\n")):
+                if(sub != []):
+                    if(sub[0] != ">"):
+                        sub = [u.upper() for u in sub]
+                    master.append(sub)
+                    sub=[]
+                    final=''
+                    final = final + str(element)
+                else:
+                    final = final + str(element)
+            if(counter == (len(fastafile)-1)):
+                final = final + str(element)
+                sub.append(final)
+                master.append(sub)
+    return(master)
+
+def fastaNpop(subMaster, allRejected, nMax):
+    maxP=nMax/100
+    newsubMaster=[]
+    nMaxList=[]
+    for subListing in subMaster:
+        totalN = len([x for x in subListing[1] if x == "N"])
+        nPercent=totalN/len(subListing[1])
+        if(nPercent >= maxP):
+            nMaxList.append(subListing)
+        else:
+            newsubMaster.append(subListing)
+    return(newsubMaster, nMaxList)
+        
+
+def fastaBasePop(master, interval):
+    allRejected=False
+    subMaster=[]
+    nList=[]
+    if(interval >= 8):
+        Linterval=interval - 2 ##change to 4
+        Rinterval=interval - 1 ##change to 4
+    else:
+        Linterval=6 ##change to 4
+        Rinterval=7 ##change to 4
+    for element in master: ##CHANGE TO SUBTRACT CORRECT DISTANCES
+        baseIn = element[1][(Linterval):-(Rinterval)] ##MAYBE add +1 on Rinterval.
+        if("N" not in baseIn):
+            subMaster.append(element)
+        else:
+            nList.append(element)
+    if(len(subMaster) == 0):
+        allRejected=True
+    return(subMaster, allRejected, nList)
+
+def fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut):
+    if(allRejected != True):
+        with open(gene,"w") as newFasta:
+            output="".join(chain.from_iterable(subMaster))
+            newFasta.write(output)
+    else:
+        with open(baseOut + "FASTA_SPLIT/" + geneDirTwo + filename + ".fasta","w") as newFasta:
+            output="".join(chain.from_iterable(master))
+            newFasta.write(output)
+        os.rename(outputLoc + "FASTA_SPLIT/" + geneDirTwo + filename + ".fasta", outputLoc + "ALLREJECTED_" + geneDirTwo + "_" + filename + ".fasta")
+    if(len(nList) != 0):
+        with open(baseOut + "N-BASE_FAILED_FASTAS.fasta","a") as newFasta:
+            output="".join(chain.from_iterable(nList))
+            newFasta.write(output)
+    if(len(nMaxList) != 0):
+        with open(baseOut + "N-THRESHOLD_FAILED_FASTAS.fasta","a") as newFasta:
+            output="".join(chain.from_iterable(nMaxList))
+            newFasta.write(output)
+
+def bashImport():
+    outputLoc=str(os.environ['outputLoc'])
+    inputFile=str(os.environ['inputFile'])
+    filename=str(os.environ['filename'])
+    gene=str(os.environ['geneTwo'])
+    nMax=int(os.environ['nMax'])
+    geneDirTwo=str(os.environ['geneDirTwo']) ##GENE Direction
+    interval=int(os.environ['windowLength'])
+    baseOut=str(os.environ['baseOut'])
+    return(inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut)
+
+def main():
+    inputFile, outputLoc, filename, gene, geneDirTwo, interval, nMax, baseOut = bashImport()
+    master=fastaMapper(gene)
+    subMaster, allRejected, nList = fastaBasePop(master, interval)
+    subMaster, nMaxList = fastaNpop(subMaster, allRejected, nMax)
+    fileSaver(subMaster, master, nList, nMaxList, gene, allRejected, baseOut)
+
+main()
+
+FASTA_SWEEP
+
+}
+
+main(){
+    moduleLoader ##LOADS CORRECT MODULES    
+    starter "$@" ##ASSIGNS INPUTS TO HASHMAP
+    if [[ "${projectDic["JOB"]}" != "THIS_IS_A_JOB" ]]; then
+        inputSize=$( stat -c%s "${projectDic["inputFile"]}")
+        if (( "${inputSize}" >= 479000000 )); then ##479MB (in decimal) and 456MB (in binary)
+        # if (( "${inputSize}" > 0 )); then ##479MB (in decimal) and 456MB (in binary)
+            echo -e "\n(.VCF) over 456Mb, generating job script and submitting operations to MSI."
+            jobCreator
+        fi
+    fi
+    dirStructure
+    vcfSplit
+    fileConverter ##MAKES BED FILE
+    local temp="${projectDic["tempOut"]}"BED_SPLIT/
+    local splitDir=("${temp}"*_split_"${projectDic[filename]}".bed*)
+    for gene in "${splitDir[@]}"; do
+        local geneDir="${gene%.*}"
+        geneDir="${geneDir##*/}"
+        geneDir=${geneDir:0:4} ##BASH IS BASE 1
+        pythonBEDScanner "$geneDir" & ##EXPANDS BED FILE WINDOWS AND CHECKS FOR OVER LAP
+    done
+    wait
+    echo -e "\nOverlap checks completed..."
+    echo -e "See Overlap results located in 'WindowOverlap.txt' in your main output directory.\n"
+    fileConverter ##CREATES FASTA FILE
+    local tempTwo="${projectDic["tempOut"]}"FASTA_SPLIT/
+    local fastalisting=("${tempTwo}"*_"${projectDic[filename]}".fasta*)
+    for geneTwo in "${fastalisting[@]}"; do
+        local geneDirTwo="${geneTwo%.*}"
+        geneDirTwo="${geneDirTwo##*/}"
+        geneDirTwo=${geneDirTwo:0:4}
+        fastaScanner "${geneDirTwo}" "${geneTwo}" & ##COPIES MASTER FASTA FILE 12 TIMES FOR ALN_TO_COUNTS
+    done
+    wait
+    fileConverter ##ALN_TO_COUNTS TABLES WHICH ARE FED INTO ALL_COUNTS
+    fileConverter ##ALL_COUNTS
+    if [[ "${projectDic["allData"]}" == "false"  ]]; then
+        local templocation="${projectDic["TempLoc"]}"
+        rm -rf "${templocation}"
+    fi
+    echo -e "operations completed...\n"
+        
+}
+
+main "$@"
