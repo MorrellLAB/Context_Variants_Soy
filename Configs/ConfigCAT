@@ -271,7 +271,7 @@ SP_QSUB="mem=62gb,nodes=1:ppn=16,walltime=96:00:00"
 #   Where is the list of read-mapped samples?
 #       To generate this list, use sample_list_generator.sh
 #       located at /sequence_handling/HelperScripts/sample_list_generator.sh
-MAPPED_LIST=/panfs/roc/scratch/fernanda/FN30cat/Read_Mapping/SAM_files_List_v2.txt
+MAPPED_LIST=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/FN30cat/Read_Mapping/SAM_files_List.txt
 
 #   The next two variables are only used if processing with Picard
 #   If using SAMtools, leave these variables blank
