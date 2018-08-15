@@ -299,8 +299,7 @@ CM_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
 #   Where is the list of finished BAM files?
 #       To generate this list, use sample_list_generator.sh
 #       located at /sequence_handling/HelperScripts/sample_list_generator.sh
-BAM_LIST=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/FN30cat/SAM_Processing/Picard/BAM_sample_list.txt
-
+BAM_LIST=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/FN30cat/SAM_Processing/Picard/BAM_31_sample_list.txt
 #   For exome capture, use the capture regions file (BED format)
 #   For whole-genome sequencing, leave this blank
 #   Coverage_Mapping should not be used for GBS data
