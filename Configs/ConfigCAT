@@ -6,11 +6,11 @@
 
 #   Where is the list of original FastQ files?
 #       Include the full file path.
-RAW_SAMPLES=/panfs/roc/scratch/fernanda/FN30cat/Paired_End_CAT_List_2.txt
+RAW_SAMPLES=/panfs/roc/scratch/fernanda/FN30cat/Adapter_Trimming/Paired_End_CAT_trimmed_List.txt
 
 #   Where are we storing the output files?
 #       Final directory is ${OUT_DIR}/Name_of_Handler
-OUT_DIR=/panfs/roc/scratch/fernanda/FN30cat/
+OUT_DIR=/panfs/roc/scratch/fernanda/FN30cat/Adapter_Trimming/
 
 #   Name this project
 PROJECT=FN30CAT
@@ -73,7 +73,7 @@ FILE_TYPE=
 
 #   What are our QSub settings for Quality_Assessment?
 #       Below are the recommended settings
-QA_QSUB="mem=1gb,nodes=1:ppn=4,walltime=6:00:00"
+QA_QSUB="mem=24gb,nodes=1:ppn=16,walltime=10:00:00"
 
 #   What is the size of the genome (for whole-genome sequencing)
 #   or capture region (for exome capture)?
@@ -218,7 +218,7 @@ MATCH=1
 MISMATCH=4
 
 #       What is our gap penalty?
-GAP=8
+GAP=6
 
 #       What is our gap extension penalty?
 EXTENSION=1
