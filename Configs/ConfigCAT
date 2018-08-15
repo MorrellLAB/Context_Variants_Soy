@@ -337,28 +337,28 @@ THETA=0.001
 
 #   What are our Qsub settings for Genotype_GVCFs?
 #       Below are the recommended settings
-GG_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
+GG_QSUB="mem=22gb,nodes=1:ppn=16,walltime=96:00:00"
 
 #   Where is the list of GVCF files?
 #       To generate this list, use sample_list_generator.sh
 #       located at /sequence_handling/HelperScripts/sample_list_generator.sh
-GVCF_LIST=
+GVCF_LIST=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/FN30cat/Haplotype_Caller/GVCF_sample_list.txt
 
 #   What is the nucleotide diversity per base pair (Watterson's theta)?
 #   Genotype_GVCFs uses the THETA under Haplotype_Caller for this
 
 #   Where is the reference dictionary file? (.dict)
 #       Include the full file path.
-REF_DICT=
+REF_DICT=/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.Picard.ML.2.8.1.dict
 
 #   How many chromosomes or chromosome parts does the reference have? (integer value)
 #       For barley: 15 (7*2 chromosome parts + chrUn)
 #       For soybean: 20 (this excludes scaffolds)
-NUM_CHR=
+NUM_CHR=20
 
 #   What is the sample ploidy? (integer value)
 #   For highly inbred samples (most barleys): 1
-PLOIDY=
+PLOIDY=2
 
 ############################################
 ##########    Create_HC_Subset    ##########
