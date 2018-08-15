@@ -10,7 +10,7 @@ RAW_SAMPLES=/panfs/roc/scratch/fernanda/FN30cat/Adapter_Trimming/Paired_End_CAT_
 
 #   Where are we storing the output files?
 #       Final directory is ${OUT_DIR}/Name_of_Handler
-OUT_DIR=/panfs/roc/scratch/fernanda/FN30cat/Adapter_Trimming/
+OUT_DIR=/panfs/roc/scratch/fernanda/FN30cat/
 
 #   Name this project
 PROJECT=FN30CAT
@@ -31,11 +31,11 @@ QUAL_ENCODING=sanger
 #           CAPILLARY, LS454, ILLUMINA,
 #           SOLID, HELICOS, IONTORRENT
 #           ONT, and PACBIO
-SEQ_PLATFORM=illumina
+SEQ_PLATFORM=ILLUMINA
 
 #   What reference genome are we using?
 #       Include the full file path.
-REF_GEN=panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa
+REF_GEN=/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa
 
 #   Is this organism barley?
 #       Choose from: "true" or "false"
@@ -168,7 +168,7 @@ RM_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
 #       If you're using the list from Quality_Trimming
 #       TRIMMED_LIST=${OUT_DIR}/Quality_Trimming/${PROJECT}_trimmed_quality.txt
 #       Include the full file path.
-TRIMMED_LIST=${OUT_DIR}/Adapter_Trimming/${PROJECT}_trimmed_adapters.txt
+TRIMMED_LIST=/panfs/roc/scratch/fernanda/FN30cat/Adapter_Trimming/FN30CAT_trimmed_adapters_100PE.txt
 
 #   How are trimmed forward samples named?
 #       If using the Adapter_Trimming handler
@@ -236,7 +236,7 @@ RESCUE=false
 INTERLEAVED=false
 
 #       What is our minimum threshold?
-RM_THRESHOLD=85
+RM_THRESHOLD=77
 
 #       Do we output all alignments, and mark as secondary?
 SECONDARY=false
