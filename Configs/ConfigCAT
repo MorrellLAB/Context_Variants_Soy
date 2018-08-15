@@ -266,7 +266,7 @@ METHOD=picard
 
 #   What are our QSub settings for SAM_Processing?
 #       Below are the recommended settings
-SP_QSUB="mem=62gb,nodes=1:ppn=16,walltime=96:00:00"
+SP_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
 
 #   Where is the list of read-mapped samples?
 #       To generate this list, use sample_list_generator.sh
