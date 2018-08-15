@@ -10,7 +10,7 @@ RAW_SAMPLES=/panfs/roc/scratch/fernanda/FN30cat/Adapter_Trimming/Paired_End_CAT_
 
 #   Where are we storing the output files?
 #       Final directory is ${OUT_DIR}/Name_of_Handler
-OUT_DIR=/panfs/roc/scratch/fernanda/FN30cat/
+OUT_DIR=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/FN30cat
 
 #   Name this project
 PROJECT=FN30CAT
@@ -267,7 +267,7 @@ METHOD=picard
 
 #   What are our QSub settings for SAM_Processing?
 #       Below are the recommended settings
-SP_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
+SP_QSUB="mem=62gb,nodes=1:ppn=16,walltime=48:00:00"
 
 #   Where is the list of read-mapped samples?
 #       To generate this list, use sample_list_generator.sh
