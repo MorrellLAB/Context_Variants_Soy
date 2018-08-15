@@ -313,7 +313,7 @@ REGIONS_FILE=
 
 #   What are our Qsub settings for Haplotype_Caller?
 #       Below are the recommended settings
-HC_QSUB="mem=250gb,nodes=1:ppn=24,walltime=24:00:00"
+HC_QSUB="mem=250gb,nodes=1:ppn=24,walltime=96:00:00"
 
 #   Which queue are we submitting the job to?
 HC_QUEUE="ram256g"
@@ -321,12 +321,12 @@ HC_QUEUE="ram256g"
 #   Where is the list of finished BAM files?
 #       To generate this list, use sample_list_generator.sh
 #       located at /sequence_handling/HelperScripts/sample_list_generator.sh
-FINISHED_BAM_LIST=
+FINISHED_BAM_LIST=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/FN30cat/SAM_Processing/Picard/BAM_sample_list.txt
 
 #   What is the nucleotide diversity per base pair (Watterson's theta)?
 #       For barley: 0.008
 #       For soybean: 0.001
-THETA=
+THETA=0.001
 
 ############################################
 ##########     Genotype_GVCFs     ##########
