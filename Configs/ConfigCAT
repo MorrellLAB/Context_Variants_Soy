@@ -6,7 +6,7 @@
 
 #   Where is the list of original FastQ files?
 #       Include the full file path.
-RAW_SAMPLES=/panfs/roc/scratch/fernanda/FN30cat/Paired_End_CAT_List.txt
+RAW_SAMPLES=/panfs/roc/scratch/fernanda/FN30cat/Paired_End_CAT_List_1.txt
 
 #   Where are we storing the output files?
 #       Final directory is ${OUT_DIR}/Name_of_Handler
