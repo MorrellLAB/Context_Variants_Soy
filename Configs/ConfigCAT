@@ -168,7 +168,7 @@ RM_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
 #       If you're using the list from Quality_Trimming
 #       TRIMMED_LIST=${OUT_DIR}/Quality_Trimming/${PROJECT}_trimmed_quality.txt
 #       Include the full file path.
-TRIMMED_LIST=/panfs/roc/scratch/fernanda/FN30cat/Adapter_Trimming/FN30CAT_trimmed_adapters_100PE.txt
+TRIMMED_LIST=/panfs/roc/scratch/fernanda/FN30cat/Adapter_Trimming/FN30CAT_trimmed_adapters_125PE.txt
 
 #   How are trimmed forward samples named?
 #       If using the Adapter_Trimming handler
@@ -236,7 +236,7 @@ RESCUE=false
 INTERLEAVED=false
 
 #       What is our minimum threshold?
-RM_THRESHOLD=77
+RM_THRESHOLD=119
 
 #       Do we output all alignments, and mark as secondary?
 SECONDARY=false
