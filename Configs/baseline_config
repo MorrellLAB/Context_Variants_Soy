@@ -1,6 +1,11 @@
 #!/bin/bash
 
-#   ***** USED FOR QUALITY ASSESSMENT ON 8-29-2018 AT *****
+##   ***** USED FOR QUALITY ASSESSMENT ON 8-29-2018 Q'ED: 1330, STARTED: 1340, COMPLETED: 0357 *****
+##   ***** Adapter_Trimming ON 08-30-2018, Q'ED: 0550, STARTED: 0604, COMPLETED: 
+##   ***** Adapter_Trimming failed, ran out of time, redoing on Mesabi
+##   ***** SAM processing (719831[]) on lab. Q'ED date/time:1020,9-7-2018 - 
+
+# Corey K Carter		
 #   More complete information on how to fill out
 #       this Config file can be found at:
 #       https://github.com/MorrellLAB/sequence_handling/wiki/Configuration
@@ -92,7 +97,7 @@ TARGET=1200000000
 
 #   What are our QSub settings for Adapter_Trimming?
 #       Below are the recommended settings
-AT_QSUB="mem=1gb,nodes=1:ppn=4,walltime=10:00:00"
+AT_QSUB="mem=62gb,nodes=1:ppn=24,walltime=96:00:00"
 
 #   Where is the list of original FastQ files?
 #       Include the full file path.
@@ -165,7 +170,7 @@ QT_THRESHOLD=
 #   What are our QSub settings for Read_Mapping?
 #       Below are the recommended settings
 #       For large files, it may be necessary to use mesabi
-RM_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
+RM_QSUB="mem=22gb,nodes=1:ppn=8,walltime=24:00:00"
 
 #   Where is our list of trimmed samples?
 #       If you're using the list from Adapter_Trimming
@@ -277,7 +282,7 @@ SP_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
 #   Where is the list of read-mapped samples?
 #       To generate this list, use sample_list_generator.sh
 #       located at /sequence_handling/HelperScripts/sample_list_generator.sh
-MAPPED_LIST=
+MAPPED_LIST=/panfs/roc/scratch/corey_workspace/BASE_106/Read_Mapping/baseSameList.txt
 
 #   The next two variables are only used if processing with Picard
 #   If using SAMtools, leave these variables blank
