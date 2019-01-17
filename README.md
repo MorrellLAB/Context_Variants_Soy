@@ -1,6 +1,9 @@
 # Context_Variants_Soy
 The nature and context of variants and new mutations in soybean.
 
+### 00_renaming
+The directory contains the scripts and lists used to rename the raw FASTQ files before processing.
+
 ### 01_sequence_handling
 This directory contains all scripts and configuration files used to process the raw FASTQ files into VCF files. Quality assessment statistics, such as mapping statistics and coverage summaries, are also included here.
 

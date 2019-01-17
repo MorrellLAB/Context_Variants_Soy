@@ -18,6 +18,3 @@ awk '{diff+=$3-$2} END {print diff}' merged_dels_collapsed.bed
 #0.038242721414547466
 
 # Deletions span roughly 4% of the mappable genome!
-
-
-
