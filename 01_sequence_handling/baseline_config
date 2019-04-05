@@ -12,13 +12,15 @@
 
 #   Where are we storing the output files?
 #       Final directory is ${OUT_DIR}/Name_of_Handler
-OUT_DIR=/panfs/roc/scratch/corey_workspace/BASE_106
+#OUT_DIR=/panfs/roc/scratch/corey_workspace/BASE_106
+OUT_DIR=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/BL107
 
 #   Name this project
 PROJECT=baseLine106
 
 #   What email should we use for job notifications?
-EMAIL=carte731@umn.edu
+#EMAIL=carte731@umn.edu
+EMAIL=wyant008@umn.edu
 
 #   What encoding is used for quality values?
 #       Look at the FastQC files to determine
@@ -233,6 +235,24 @@ MAX_FILES=1000
 #           with picard, you can optionally specify a temp directory
 #       Otherwise, leave blank
 TMP=
+
+############################################
+##########    Coverage_Mapping    ##########
+############################################
+
+#   What are our Qsub settings for Coverage_Mapping?
+#       Below are the recommended settings
+CM_QSUB="mem=22gb,nodes=1:ppn=16,walltime=24:00:00"
+
+#   Where is the list of finished BAM files?
+#       To generate this list, use sample_list_generator.sh
+#       located at /sequence_handling/HelperScripts/sample_list_generator.sh
+BAM_LIST=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/BL107/SAM_Processing/BAMs.list
+
+#   For exome capture, use the capture regions file (BED format)
+#   For whole-genome sequencing, leave this blank
+#   Coverage_Mapping should not be used for GBS data
+REGIONS_FILE=
 
 ############################################
 ##########      Dependencies      ##########
