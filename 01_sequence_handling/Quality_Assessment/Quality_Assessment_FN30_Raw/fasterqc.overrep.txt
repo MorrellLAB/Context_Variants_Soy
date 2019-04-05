@@ -1,0 +1,60 @@
+### Overrepresented Sequences ###
+Sample: /scratch/Jzq1NRD9zW/1R36C56Cdbbr418MN13_R1_CAT_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+GATCGGAAGAGCACACGTCTGAACTCCAGTCACGCCAATATCTCGTATGC	350025	0.40046262714924385	TruSeq Adapter, Index 6 (100% over 50bp)
+ATCGGAAGAGCACACGTCTGAACTCCAGTCACGCCAATATCTCGTATGCC	213704	0.2444981509100836	TruSeq Adapter, Index 6 (100% over 50bp)
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/1R36C56Cdbbr418MN13_R2_CAT_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+GATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCG	354624	0.4057243302340503	Illumina Single End PCR Primer 1 (100% over 50bp)
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012BM7F068_R1_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012BM7F068_R2_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012BM7F223_R1_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012BM7F223_R2_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM7F040P05_R1_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM7F040P05_R2_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM7F040P06_R1_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM7F040P06_R2_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM7F040P07_R1_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM7F040P07_R2_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM8F030P02_R1_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM8F030P02_R2_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM8F030P07_R1_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/2012CM8F030P07_R2_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/4R30C22acr626MN13_R1_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/Jzq1NRD9zW/4R30C22acr626MN13_R2_CAT_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE

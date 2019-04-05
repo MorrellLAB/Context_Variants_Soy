@@ -1,0 +1,11 @@
+### Overrepresented Sequences ###
+Sample: /scratch/Opln3sspFb/RP8DM5r597MN13_R1_CAT_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+GATCGGAAGAGCACACGTCTGAACTCCAGTCACCGATGTATCTCGTATGC	90583	0.10432151438588995	TruSeq Adapter, Index 2 (100% over 50bp)
+>>END_MODULE
+Sample: /scratch/Opln3sspFb/RP8DM5r597MN13_R2_CAT_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+GATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCG	91386	0.10524630354116049	Illumina Single End PCR Primer 1 (100% over 50bp)
+>>END_MODULE

@@ -1,0 +1,83 @@
+### Overrepresented Sequences ###
+Sample: /scratch/5SEcr9sWZ8/FN0172932.09.08.01.M5__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0172932.09.08.01.M5__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	235931	0.16579093496843883	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0173217.03.09.01.M5__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+GGGGGATCCTTATCTGTCAAAACCGCTAATGTCCGTTCTAAGACCGTCTG	237642	0.11894328916388806	No Hit
+GGGCCATACTAGTACTGGATGCATCTGCAGGATATCGCGGCCGCCATCTG	212995	0.10660710596385461	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0173217.03.09.01.M5__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	232513	0.11637614981090509	No Hit
+GGGCCATACTAGTACTGGATGCATCTGCAGGATATCGCGGCCGCCATCTG	216286	0.10825429949293766	No Hit
+GGGGGATCCTTATCTGTCAAAACCGCTAATGTCCGTTCTAAGACCGTCTG	207229	0.1037211388144493	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0175143.05.06.01.M5__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0175143.05.06.01.M5__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	281570	0.14714891311659134	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0175501.x2.02.01.M5__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0175501.x2.02.01.M5__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	174340	0.10689683622644383	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0190069.01.01.M4__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/FN0190069.01.01.M4__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	207858	0.11346841689280503	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/M92-220.x1.04.WT__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/M92-220.x1.04.WT__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	419062	0.12015972743203722	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/R18C55Dhaar437MN13__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	pass
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/R18C55Dhaar437MN13__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	105493	0.11918702008576905	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/R52C55Dadr564MN13__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	96358	0.12616584055742472	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/R52C55Dadr564MN13__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	93226	0.12206497282847793	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/RP8DM5r597MN13__Forward_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	124153	0.14298299874757292	No Hit
+>>END_MODULE
+Sample: /scratch/5SEcr9sWZ8/RP8DM5r597MN13__Reverse_ScytheTrimmed_fastqc
+>>Overrepresented sequences	warn
+#Sequence	Count	Percentage	Possible Source
+N	120774	0.13909151362221914	No Hit
+GATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCG	91095	0.10491116824329781	Illumina Single End PCR Primer 1 (100% over 50bp)
+>>END_MODULE

@@ -4,10 +4,10 @@ Configuration files and output statistics from the [sequence_handling](https://g
 ### Inputs
 - The 106 soybean lines used as a "baseline" for natural variation.
     - `/panfs/roc/scratch/fernanda/baseline/FastQ` 
-    - [Put SRA link here]()
+    - [PRJNA289660](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA289660) ([Valliyodan et al. 2016](https://www.nature.com/articles/srep23598))
 - The 30 fast neutron irradiated lines and 1 genetic background line (M92-220)
     - `/panfs/roc/scratch/fernanda/FN30cat`
-    - [PRJNA237333](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA237333) ([Valliyodan et al. 2016](https://www.nature.com/articles/srep23598))
+    - [PRJNA237333](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA237333) 
 - Total: 137 FASTQ files
 
 ### Dependencies
