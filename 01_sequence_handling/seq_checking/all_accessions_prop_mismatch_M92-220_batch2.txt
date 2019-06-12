@@ -1,0 +1,2 @@
+#Accession	R1_prop_mismatch	R2_prop_mismatch
+M92-220_batch2_combined	0.0	0.0
