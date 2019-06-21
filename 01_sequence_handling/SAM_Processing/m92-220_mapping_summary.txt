@@ -1,0 +1,2 @@
+Sample name	Total reads	Percent mapped	Percent paired	Percent singletons	Fraction with mate mapped to different chr
+M92-220_batch2_combined	729330613	98.76%	90.94%	0.30%	.06506960376281366925

@@ -1,0 +1,5 @@
+Sample name	Min	1st Q	Mode	Median	Mean	3rd Q	Max
+M92-220_10x_illumina	0	13	17	17	18.5124	21	399153
+M92-220_10x_longranger	0	54	64	68	78.8091	84	1385210
+M92-220_batch2_combined	0	89	102	101	107.866	113	2164038
+M92-220_Bolon	0	46	60	59	62.4136	71	46083
