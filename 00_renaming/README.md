@@ -1,5 +1,5 @@
 # Sample renaming scripts
-This directory contains the scripts used to rename the raw FASTQ files. 
+This directory contains scripts used to rename raw FASTQ files. 
 
 ### Inputs
 - 212 soybean FASTQ files found at `/panfs/roc/scratch/fernanda/baseline/FastQ`
