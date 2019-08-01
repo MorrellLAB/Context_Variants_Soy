@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l mem=16gb,nodes=1:ppn=4,walltime=24:00:00
+#PBS -l mem=8gb,nodes=1:ppn=4,walltime=24:00:00
 #PBS -m abe
 #PBS -M wyant008@umn.edu
 #PBS -q mesabi
@@ -25,7 +25,7 @@ DEL_BED=/panfs/roc/groups/9/morrellp/shared/Datasets/10x_Genomics/Soybean/m92_22
 GOOD_SAMPS=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/analysis/de_novo/good_samps.list
 
 # The final, filtered, zipped VCF of the baseline 107
-BL107=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/analysis/de_novo/filtered/BL107_final_filtered_nomis.vcf.gz
+BL107=/panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/analysis/de_novo_old/filtered/BL107_final_filtered_nomis.vcf.gz
 
 # Load dependencies
 module load bcftools/1.9
@@ -96,8 +96,9 @@ bcftools index "${OUT_DIR}/intermediates/FN27_singhom.vcf.gz"
 # Remove any sites found to be segregating in the BL107
 bcftools isec -p "${OUT_DIR}/intermediates/" "${OUT_DIR}/intermediates/FN27_singhom.vcf.gz" "${BL107}"
 bcftools view -O z -o "${OUT_DIR}/intermediates/0002.vcf.gz" "${OUT_DIR}/intermediates/0002.vcf"
+bcftools index "${OUT_DIR}/intermediates/0002.vcf.gz"
 bcftools isec -C -O v -o "${OUT_DIR}/intermediates/FN27_isec.tsv" "${OUT_DIR}/intermediates/FN27_singhom.vcf.gz" "${OUT_DIR}/intermediates/0002.vcf.gz"
-bcftools view -R "${OUT_DIR}/intermediates/FN27_isec.tsv" -o "${OUT_DIR}/intermediates/FN27_singhom_isec.vcf" "${OUT_DIR}/intermediates/FN27_singhom.vcf"
+bcftools view -R "${OUT_DIR}/intermediates/FN27_isec.tsv" -o "${OUT_DIR}/intermediates/FN27_singhom_isec.vcf" "${OUT_DIR}/intermediates/FN27_singhom.vcf.gz"
 
 # Remove duplicate sites
 bcftools norm -d all "${OUT_DIR}/intermediates/FN27_singhom_isec.vcf" > "${OUT_DIR}/FN27_de_novo_final.vcf"

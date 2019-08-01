@@ -1,3 +1,5 @@
 #   Ignore DS Store file
 .DS_Store
+02_snp_filtering/notebooks/.ipynb_checkpoints/
+04_figures/.ipynb_checkpoints/
 02_snp_filtering/.ipynb_checkpoints/
