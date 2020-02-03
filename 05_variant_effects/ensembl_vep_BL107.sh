@@ -15,7 +15,7 @@ VARIANT_SET=snps
 cd /scratch.global/pmorrell/Context_of_Mutations
 
 /home/morrellp/shared/Software/ensembl-vep-release-97.3/vep \
-    -i /panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/analysis/de_novo/FN27_de_novo_final_all_snps.vcf.gz \
+    -i /panfs/roc/groups/9/morrellp/shared/Projects/Context_Of_Mutations/analysis/de_novo/filtered/BL107_final_all_snps.vcf.gz \
     --gff /scratch.global/pmorrell/Context_of_Mutations/Gmax_275_Wm82.a2.v1.gene_exons_sorted.gff3.gz \
     --fasta /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Soybean/PhytozomeV11/Gmax/assembly/Gmax_275_v2.0.fa \
     --species glycine_max \
