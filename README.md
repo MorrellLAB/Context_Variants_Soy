@@ -15,3 +15,7 @@ This directory contains configuration files and scripts used to analyze the cont
 
 ### 04_figures
 This directory contains scripts that reproduce manuscript figures.
+
+### 05_variant_effects
+This directory includes scripts and configurations to run VEP (Variant Effect Predictor). The reports for each class of variant are also included.
+
