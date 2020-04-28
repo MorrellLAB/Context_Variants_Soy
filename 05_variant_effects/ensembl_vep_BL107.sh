@@ -23,5 +23,6 @@ cd /scratch.global/pmorrell/Context_of_Mutations
     --check_svs \
     --verbose \
     --format vcf \
+    --force \
     --warning_file BL107_vep_err_${VARIANT_SET}.txt \
     -o BL107_VeP_${VARIANT_SET}.txt
