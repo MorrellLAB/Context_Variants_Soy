@@ -12,7 +12,7 @@ The mutagenic effects of ionizing radiation have been used for decades to create
     - [SRA PRJNA237333](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA237333)
 - Illumina paired-end sequencing from 106 diverse soybean landraces and cultivated varieties from Valliyodan et al. 2016 
     - [Publication](https://doi.org/10.1038/srep23598) 
-    - [SRA SRP062245](https://www.ncbi.nlm.nih.gov//bioproject/PRJNA289660)
+    - [SRA PRJNA289660](https://www.ncbi.nlm.nih.gov//bioproject/PRJNA289660)
 
 ## Repository Organization
 ### 00_renaming
