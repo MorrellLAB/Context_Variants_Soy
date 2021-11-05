@@ -5,8 +5,8 @@ Wyant SR, Rodriguez MF, Carter CK, Parrott WA, Jackson SA, Stupar RM, Morrell PL
 The mutagenic effects of ionizing radiation have been used for decades to create novel variants in experimental populations. Fast neutron (FN) bombardment as a mutagen has been especially widespread in plants, but the full spectrum of induced mutations is poorly understood. We contrast small insertions and deletions (indels) observed in 27 soybean lines subject to FN irradiation with the standing indels identified in 107 diverse soybean lines. We use the same populations to contrast the nature and context (bases flanking a nucleotide change) of single nucleotide variants. 
 
 ## Datasets
-- Illumina paired-end sequencing for the line M92-220: [SRA BIOSAMPLE NUMBER]()
-- 10X Genomics linked read sequencing for the line M92-220: [SRA BIOSAMPLE NUMBER]()
+- Illumina paired-end sequencing for the line M92-220: [SRA PRJNA670564](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA670564)
+- 10X Genomics linked read sequencing for the line M92-220: [SRA PRJNA670564](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA670564)
 - Illumina paired-end sequencing from 30 fast-neutron treated lines and one M92-220 plant from Bolon et al. 2014
     - [Publication](https://doi.org/10.1534/genetics.114.170340) 
     - [SRA PRJNA237333](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA237333)
